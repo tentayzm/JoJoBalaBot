@@ -11,7 +11,7 @@ from aiogram.enums import ParseMode
 from config import Config
 from handlers import setup_handlers
 from middlewares.logging_middleware import LoggingMiddleware
-
+from health_server import start_health_server
 
 # Configure logging
 logging.basicConfig(
@@ -51,6 +51,9 @@ async def main() -> None:
         
         logger.info("Bot handlers and middleware registered")
         
+        asyncio.create_task(start_health_server())
+        logger.info("Health check server started on port 8080")
+        
         # Start polling
         logger.info("Starting bot polling...")
         await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
@@ -65,7 +68,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Bot stopped by user")
-        from health_server import start_health_server
-import asyncio
-
-asyncio.create_task(start_health_server())
