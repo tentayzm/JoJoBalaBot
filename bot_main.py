@@ -65,3 +65,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Bot stopped by user")
+        from health_server import start_health_server
+import asyncio
+
+asyncio.create_task(start_health_server())
