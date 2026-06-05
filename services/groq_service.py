@@ -18,6 +18,15 @@ class GroqService:
         self.config = get_config()
         self.client = Groq(api_key=self.config.groq_api_key)
         self.instructions = self.config.load_instructions()
+        
+        # پرامپت سیستمی فارسی و خودمونی
+        self.system_prompt = (
+            "تو یک ربات ایرانی هستی به اسم 'جوجوبلا'. همیشه به زبان فارسی، "
+            "با لحنی خودمونی، شوخ، صمیمی و خیابانی جواب بده. هیچوقت نگو "
+            "'به عنوان یک هوش مصنوعی' یا 'من یک ربات هستم'. از کلماتی مثل "
+            "'داداش'، 'ببین'، 'بیا'، 'باشه' استفاده کن. خودتو جوجوبلا معرفی کن. "
+            "حتی اگه کاربر انگلیسی پرسید، بازم به فارسی جواب بده."
+        )
     
     async def analyze_text(
         self,
@@ -36,6 +45,10 @@ class GroqService:
         """
         try:
             logger.info("Sending text analysis request to Groq")
+            
+            # اضافه کردن پرامپت سیستمی به اول messages (اگه هنوز اضافه نشده)
+            if not messages or messages[0].get("role") != "system":
+                messages.insert(0, {"role": "system", "content": self.system_prompt})
             
             response = self.client.chat.completions.create(
                 model=self.config.text_model,
@@ -80,6 +93,10 @@ class GroqService:
             
             chat_completion = self.client.chat.completions.create(
                 messages=[
+                    {
+                        "role": "system",
+                        "content": self.system_prompt
+                    },
                     {
                         "role": "user",
                         "content": [
@@ -131,7 +148,9 @@ class GroqService:
         ])
         
         # Build messages with search context
-        messages = conversation_history + [
+        messages = [
+            {"role": "system", "content": self.system_prompt}
+        ] + conversation_history + [
             {
                 "role": "user",
                 "content": (
