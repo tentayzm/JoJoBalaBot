@@ -26,6 +26,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+async def self_ping():
+    """هر 4 دقیقه یکبار به خودش پینگ میزنه تا Render نخوابونه"""
+    import aiohttp
+    while True:
+        await asyncio.sleep(240)  # 4 دقیقه
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://jojobalabot-10.onrender.com/health") as resp:
+                    if resp.status == 200:
+                        logger.info("✅ Self-ping successful")
+                    else:
+                        logger.warning(f"⚠️ Self-ping failed with status {resp.status}")
+        except Exception as e:
+            logger.error(f"❌ Self-ping error: {e}")
+
+
 async def main() -> None:
     """Main bot function."""
     try:
@@ -51,8 +67,13 @@ async def main() -> None:
         
         logger.info("Bot handlers and middleware registered")
         
+        # Start health check server (for external monitoring)
         asyncio.create_task(start_health_server())
         logger.info("Health check server started on port 8080")
+        
+        # Start self-ping (to keep the bot awake)
+        asyncio.create_task(self_ping())
+        logger.info("Self-ping task started (every 4 minutes)")
         
         # Start polling
         logger.info("Starting bot polling...")
