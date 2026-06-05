@@ -34,9 +34,14 @@ async def safe_delete_message(message: Message) -> None:
 
 @router.message(F.photo)
 async def handle_photo(message: Message) -> None:
-    """Handle photo messages."""
+    """Handle photo messages only if there's a caption."""
+    # 👇 مهم: اگه کپشن نداشت، هیچ کاری نکن
+    if not message.caption or message.caption.strip() == "":
+        logger.info("Photo without caption, ignoring")
+        return
+    
     config = get_config()
-    user_text = message.caption if message.caption else "Проанализируй это изображение."
+    user_text = message.caption
     
     # Get largest photo
     photo = message.photo[-1]
@@ -47,7 +52,7 @@ async def handle_photo(message: Message) -> None:
     compressed_path = config.upload_directory / f"compressed_{file_name}"
     
     # Send status message
-    status_msg = await message.answer("Запрос получен, анализирую...")
+    status_msg = await message.answer("⏳ در حال پردازش عکس...")
     
     try:
         # Download photo
@@ -89,13 +94,13 @@ async def handle_photo(message: Message) -> None:
     except ValueError as ve:
         logger.error(f"Validation error: {ve}")
         await safe_delete_message(status_msg)
-        await message.reply(f"Ошибка: {ve}", reply_markup=get_main_keyboard())
+        await message.reply(f"❌ خطا: {ve}", reply_markup=get_main_keyboard())
         
     except Exception as e:
         logger.error(f"Error analyzing image: {e}", exc_info=True)
         await safe_delete_message(status_msg)
         await message.reply(
-            "Произошла ошибка при анализе изображения.",
+            "❌ خطا در تحلیل عکس. دوباره تلاش کن.",
             reply_markup=get_main_keyboard()
         )
         
