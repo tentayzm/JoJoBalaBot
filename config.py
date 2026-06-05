@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-# Load environment variables from .env file
 from dotenv import load_dotenv
 
 # Load .env file from current directory or parent directory
@@ -22,36 +21,26 @@ else:
 class Config:
     """Bot configuration."""
     
-    # API Keys
+    # ========== متغیرهای اجباری (بدون مقدار پیش‌فرض) ==========
     telegram_token: str
     groq_api_key: str
-    
-    # Redis (برای حافظه دائمی)
-    upstash_redis_rest_url: str = ""
-    upstash_redis_rest_token: str = ""
-    
-    # Directories
     upload_directory: Path
     
-    # Image settings
+    # ========== متغیرهای اختیاری (با مقدار پیش‌فرض) ==========
     max_image_size: int = 1024 * 1024  # 1MB
     max_image_resolution: tuple[int, int] = (1024, 1024)
-    
-    # Text settings
     max_text_length: int = 200
     max_base64_size: int = 1_000_000
-    
-    # Model settings
     vision_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
     text_model: str = "openai/gpt-oss-120b"
-    
-    # Search settings
-    search_region: str = "ru-ru"  # ru-ru for Russia, us-en for USA
+    search_region: str = "ru-ru"
     search_max_results: int = 5
     search_timeout: int = 10
-    
-    # Instructions file
     instructions_file: Path = Path(".instruct")
+    
+    # ========== متغیرهای Redis (مقدار پیش‌فرض خالی) ==========
+    upstash_redis_rest_url: str = ""
+    upstash_redis_rest_token: str = ""
     
     @classmethod
     def from_env(cls) -> "Config":
@@ -67,12 +56,11 @@ class Config:
         upload_dir = Path(os.getenv("UPLOAD_DIRECTORY", "/tmp/bot_llama"))
         upload_dir.mkdir(parents=True, exist_ok=True)
         
-        # Optional search settings
         search_region = os.getenv("SEARCH_REGION", "ru-ru")
         search_max_results = int(os.getenv("SEARCH_MAX_RESULTS", "5"))
         search_timeout = int(os.getenv("SEARCH_TIMEOUT", "10"))
         
-        # Redis variables (برای حافظه دائمی)
+        # متغیرهای Redis (اختیاری)
         upstash_redis_rest_url = os.getenv("UPSTASH_REDIS_REST_URL", "")
         upstash_redis_rest_token = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
         
