@@ -38,7 +38,7 @@ class Config:
     max_base64_size: int = 1_000_000
     
     # Model settings
-    vision_model: str = "llama-3.2-90b-vision-preview"
+    vision_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
     text_model: str = "openai/gpt-oss-120b"
     
     # Search settings
