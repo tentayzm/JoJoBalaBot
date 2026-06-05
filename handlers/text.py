@@ -19,12 +19,21 @@ async def handle_mention(message: Message):
     # دریافت پاسخ از Groq
     response = await groq_service.analyze_text(messages)
     
-    # ارسال پاسخ به صورت ریپلای
-    await message.reply(response)
+    # ارسال پاسخ به صورت ریپلای (با تقسیم به چند پیام اگه طولانی بود)
+    if len(response) > 4000:
+        for i in range(0, len(response), 4000):
+            await message.reply(response[i:i+4000])
+    else:
+        await message.reply(response)
 
 # برای چت خصوصی (بدون منشن)
 @router.message(F.chat.type == "private")
 async def handle_private(message: Message):
     messages = [{"role": "user", "content": message.text}]
     response = await groq_service.analyze_text(messages)
-    await message.reply(response)
+    
+    if len(response) > 4000:
+        for i in range(0, len(response), 4000):
+            await message.reply(response[i:i+4000])
+    else:
+        await message.reply(response)
