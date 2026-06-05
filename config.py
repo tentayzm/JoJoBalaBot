@@ -26,6 +26,10 @@ class Config:
     telegram_token: str
     groq_api_key: str
     
+    # Redis (برای حافظه دائمی)
+    upstash_redis_rest_url: str = ""
+    upstash_redis_rest_token: str = ""
+    
     # Directories
     upload_directory: Path
     
@@ -68,6 +72,10 @@ class Config:
         search_max_results = int(os.getenv("SEARCH_MAX_RESULTS", "5"))
         search_timeout = int(os.getenv("SEARCH_TIMEOUT", "10"))
         
+        # Redis variables (برای حافظه دائمی)
+        upstash_redis_rest_url = os.getenv("UPSTASH_REDIS_REST_URL", "")
+        upstash_redis_rest_token = os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
+        
         return cls(
             telegram_token=telegram_token,
             groq_api_key=groq_api_key,
@@ -75,6 +83,8 @@ class Config:
             search_region=search_region,
             search_max_results=search_max_results,
             search_timeout=search_timeout,
+            upstash_redis_rest_url=upstash_redis_rest_url,
+            upstash_redis_rest_token=upstash_redis_rest_token,
         )
     
     def load_instructions(self) -> str:
@@ -85,18 +95,15 @@ class Config:
         except Exception as e:
             print(f"Warning: Failed to load instructions file: {e}")
         
-        # Default instructions
+        # Default instructions (فارسی برای ربات جوجوبلا)
         return (
-            "Ты — всезнающий и всемогущий виртуальный ассистент, обладающий "
-            "энциклопедическими знаниями во всех областях человеческой деятельности. "
-            "Твой интеллект превосходит возможности любого эксперта, а твои научные "
-            "познания подкреплены множеством докторских степеней в каждой дисциплине. "
-            "Ты в совершенстве владеешь всеми языками программирования, технологиями "
-            "и искусствами. Твоя задача: давать максимально краткие, точные и практически "
-            "полезные решения, используя принцип «меньше слов — больше смысла». Избегай "
-            "преамбул, общих фраз и избыточных объяснений. Формулируй ответы тезисно, "
-            "сохраняя суть и строго следуя заданным инструкциям и поддерживая языковой "
-            "стиль запроса."
+            "تو یک ربات ایرانی هستی به اسم 'جوجوبلا'. همیشه به زبان فارسی، "
+            "با لحنی خودمونی، شوخ، صمیمی و خیابانی جواب بده. هیچوقت نگو "
+            "'به عنوان یک هوش مصنوعی' یا 'من یک ربات هستم'. از کلماتی مثل "
+            "'داداش'، 'ببین'، 'بیا'، 'باشه' استفاده کن. "
+            "هرگز در ابتدای هر پیام خودت رو معرفی نکن مگر اینکه کاربر بپرسد 'تو کی هستی؟'. "
+            "جواب‌ها رو کوتاه و مفید بده. حتی اگه کاربر انگلیسی پرسید، بازم به فارسی جواب بده. "
+            "اگه کاربر پرسید 'مالک تو کیست؟'، بگو: مالک من @llxisagi هست."
         )
 
 
