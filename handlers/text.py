@@ -1,6 +1,9 @@
 from aiogram import F, Router
 from aiogram.types import Message
-from services.groq_service import analyze_text
+from services.groq_service import GroqService
+
+# ساخت یک نمونه از کلاس GroqService
+groq_service = GroqService()
 
 router = Router()
 
@@ -10,8 +13,11 @@ async def handle_mention(message: Message):
     user_message = message.text or ""
     user_message = user_message.replace("@OrgKonohaBot", "").strip()
     
+    # ساخت لیست messages برای ارسال به متد analyze_text
+    messages = [{"role": "user", "content": user_message}]
+    
     # دریافت پاسخ از Groq
-    response = await analyze_text(user_message)
+    response = await groq_service.analyze_text(messages)
     
     # ارسال پاسخ به صورت ریپلای
     await message.reply(response)
@@ -19,5 +25,6 @@ async def handle_mention(message: Message):
 # برای چت خصوصی (بدون منشن)
 @router.message(F.chat.type == "private")
 async def handle_private(message: Message):
-    response = await analyze_text(message.text)
+    messages = [{"role": "user", "content": message.text}]
+    response = await groq_service.analyze_text(messages)
     await message.reply(response)
